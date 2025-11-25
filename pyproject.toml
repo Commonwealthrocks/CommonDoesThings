@@ -1,0 +1,30 @@
+## pyproject.toml
+## last updated: 25/11/2025 <d/m/y>
+## common-does-things
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "commondoesthings"
+version = "0.1a"
+description = "Custom Python functions made in C that I or you might find useful..."
+authors = [{ name = "Commonwealthrocks" }]
+requires-python = ">=3.8"
+classifiers = [
+    "Development status :: 3 - Alpha",
+    "Intended audience :: Developers",
+    "License :: OSI approved :: MIT license",
+    "Programming language :: Python :: 3",
+    "Programming language :: Python :: 3.8",
+    "Programming language :: Python :: 3.9",
+    "Programming language :: Python :: 3.10",
+    "Programming language :: Python :: 3.11",
+    "Programming language :: Python :: 3.12",
+    "Programming langauge :: Python :: 3.13",
+    "Programming language :: C",
+]
+[project.urls]
+Repository = "https://github.com/Commonwealthrocks/CommonDoesThings"
+
+## end
+## .toml files always end with new lines... hmph!
