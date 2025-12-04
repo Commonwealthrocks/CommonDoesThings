@@ -44,4 +44,4 @@ c_set_array(PyObject *self, PyObject *args)
     return PyByteArray_FromStringAndSize(NULL, size);
 }
 
-// end
+// end //

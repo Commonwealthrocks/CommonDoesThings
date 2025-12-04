@@ -16,6 +16,7 @@ extern PyObject *c_iusenixosbtw(PyObject *self, PyObject *args);
 extern PyObject *c_rmfile(PyObject *self, PyObject *args, PyObject *kwargs);
 extern PyObject *c_rmdir(PyObject *self, PyObject *args, PyObject *kwargs);
 extern PyObject *c_contime(PyObject *self, PyObject *args);
+extern PyObject *c_listdir(PyObject *self, PyObject *args, PyObject *kwargs);
 PyMethodDef c_methods[] = {
     {"run",
      (PyCFunction)c_run,
@@ -166,6 +167,37 @@ PyMethodDef c_methods[] = {
      "    >>> computed_mac = calculate_mac(data)\n"
      "    >>> if c.contime(expected_mac, computed_mac):\n"
      "    ...     print('authenticated!')\n"},
+    {"listdir",
+     (PyCFunction)c_listdir,
+     METH_VARARGS | METH_KEYWORDS,
+     "listdir(path='.', pattern=None, recursive=False, fullpath=False, files_only=False, dirs_only=False) -> list\n\n"
+     "List directory contents with advanced filtering.\n\n"
+     "Finally, a listdir that doesn't suck! Unlike os.listdir(), this supports:\n"
+     "  - Recursive directory traversal\n"
+     "  - Wildcard pattern matching (*.txt, *.py, etc.)\n"
+     "  - Full path or just filenames\n"
+     "  - Filter for only files or only directories\n\n"
+     "Args:\n"
+     "    path (str): directory path to list (default: current directory).\n"
+     "    pattern (str): wildcard pattern like '*.txt' or 'test_*.py' (default: None, matches all).\n"
+     "    recursive (bool): if True, search subdirectories recursively (default: False).\n"
+     "    fullpath (bool): if True, return full paths; if False, return just filenames (default: False).\n"
+     "    files_only (bool): if True, only return files, not directories (default: False).\n"
+     "    dirs_only (bool): if True, only return directories, not files (default: False).\n\n"
+     "Returns:\n"
+     "    list: list of file/directory paths as strings.\n\n"
+     "Examples:\n"
+     "    >>> # List all files in current directory\n"
+     "    >>> files = c.listdir()\n"
+     "    \n"
+     "    >>> # Find all Python files recursively\n"
+     "    >>> py_files = c.listdir('.', pattern='*.py', recursive=True, fullpath=True)\n"
+     "    \n"
+     "    >>> # Find all .txt files (non-recursive)\n"
+     "    >>> txt_files = c.listdir('/documents', pattern='*.txt', files_only=True)\n"
+     "    \n"
+     "    >>> # List only subdirectories\n"
+     "    >>> dirs = c.listdir('/home', dirs_only=True)\n"},
     {NULL, NULL, 0, NULL}};
 
 // end

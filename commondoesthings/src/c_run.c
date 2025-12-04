@@ -22,7 +22,7 @@ c_run(PyObject *self, PyObject *args)
     pipe = popen(command, "r");
     if (!pipe)
     {
-        PyErr_SetString(PyExc_IOError, "No exec; could not execute command.");
+        PyErr_SetString(PyExc_IOError, "No exec(); could not execute command.");
         return NULL;
     }
     PyObject *byte_list = PyList_New(0);
@@ -54,4 +54,4 @@ c_run(PyObject *self, PyObject *args)
     return result_bytes;
 }
 
-// end
+// end //
