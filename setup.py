@@ -1,5 +1,5 @@
 ## setup.py
-## last updated: 25/11/2025 <d/m/y>
+## last updated: 04/12/2025 <d/m/y>
 ## common-does-things
 from setuptools import setup, Extension
 import sys
@@ -26,7 +26,8 @@ c_module = Extension(
         "commondoesthings/src/_compiler_based.c",
         "commondoesthings/src/c_docs.c",
         "commondoesthings/src/c_rm.c",
-        "commondoesthings/src/c_con_time.c",],
+        "commondoesthings/src/c_con_time.c",
+        "commondoesthings/src/c_hashes.c",],
     include_dirs=["commondoesthings/src"],
     extra_compile_args=extra_compile_args,
     extra_link_args=extra_link_args,
