@@ -1,12 +1,12 @@
 ## pyproject.toml
-## last updated: 25/11/2025 <d/m/y>
+## last updated: 04/12/2025 <d/m/y>
 ## common-does-things
 [build-system]
 requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 [project]
 name = "commondoesthings"
-version = "0.1a"
+version = "0.2a"
 description = "Custom Python functions made in C that I or you might find useful..."
 authors = [{ name = "Commonwealthrocks" }]
 requires-python = ">=3.8"
