@@ -26,6 +26,15 @@ Oh boy I'm ~~(not)~~ glad you asked! I'll list off the features for **CommonDoes
 
 `c.bytes(bytearray)` overwrites string from **Python** and from RAM by zero'ing it.
 
+### **Hashing** 
+`c.hash_fast(data)` - blazing fast non cryptographic hash **(xxHash based)** for file comparison, checksums, deduplication.
+
+`c.hash_secure(data)` - my own **CommonHash-256** cryptographic hash algorithm! 256 bit output with custom **Sbox** and **Merkle-Damgard** construction.
+
+`c.hash_file_fast(path)` - fast hash entire files (optimized for speed).
+
+`c.hash_file_secure(path)` - cryptographically secure file hashing for integrity verification.
+
 ### **File operations**
 `c.read(path, binary=False)` - file reading; one liner.
 
@@ -77,8 +86,8 @@ To compile the **C** code yourself / install it with `pip` you will need a **C**
 from commondoesthings import *
 
 ## generate cryptographic keys / bytes
-key = c.random(32)  ## 256-bit key
-iv = c.random(16)   ## 128-bit iv
+key = c.random(32)  ## 256 bit key
+iv = c.random(16)   ## 128 bit iv
 
 ## secure random numbers
 rand_range = c.random_range(1, 7)
@@ -86,6 +95,18 @@ rand_range = c.random_range(1, 7)
 ## constant time comparison (prevent timing attacks)
 if c.contime(expected_hash, computed_hash):
     print("Authenticated.")
+
+## hashing; fast non cryptographic hashes
+file_hash = c.hash_fast(b"file contents")
+quick_checksum = c.hash_file_fast("bigfile.iso")
+
+## hashing cryptographic (CommonHash-256; yes i am well aware of how unoriginal i am)
+secure_digest = c.hash_secure(b"important data")
+print(secure_digest.hex())  ## 64 hex chars (32 bytes)
+
+file_digest = c.hash_file_secure("maybe_malawre.exe")
+if file_digest == expected_digest:
+    print("File integrity verified.")
 
 ## file i/o
 c.write("hi.txt", "Hello World!")
@@ -103,6 +124,17 @@ output = c.run("echo Hello")
 print(output)
 ```
 About everything you'd need to know about **CommonDoesThings**...
+
+---
+
+### **CommonHash-256**
+This little *mess* that I call a hashing algorithm is based on...
+- **256 bit output** (32 bytes); same size as `SHA-256`.
+- **Merkle-Damgard construction** - proven structure used by many hash functions.
+- **Custom S-box** - adds confusion layer for better collision resistance.
+- **Fast compression function** - optimized for performance, believe it or not.
+
+Now you might be asking yourself; *"Is this production ready?"*, to that I say fuck no. Just use `SHA-256 / 512`. This was more made just for fun and wanting to see how secure can it be.
 
 ---
 
