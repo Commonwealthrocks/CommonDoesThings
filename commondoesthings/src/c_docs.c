@@ -17,6 +17,10 @@ extern PyObject *c_rmfile(PyObject *self, PyObject *args, PyObject *kwargs);
 extern PyObject *c_rmdir(PyObject *self, PyObject *args, PyObject *kwargs);
 extern PyObject *c_contime(PyObject *self, PyObject *args);
 extern PyObject *c_listdir(PyObject *self, PyObject *args, PyObject *kwargs);
+extern PyObject *c_hash_fast(PyObject *self, PyObject *args);
+extern PyObject *c_hash_secure(PyObject *self, PyObject *args);
+extern PyObject *c_hash_file_fast(PyObject *self, PyObject *args);
+extern PyObject *c_hash_file_secure(PyObject *self, PyObject *args);
 PyMethodDef c_methods[] = {
     {"run",
      (PyCFunction)c_run,
@@ -187,17 +191,62 @@ PyMethodDef c_methods[] = {
      "Returns:\n"
      "    list: list of file/directory paths as strings.\n\n"
      "Examples:\n"
-     "    >>> # List all files in current directory\n"
+     "    >>> ## List all files in current directory\n"
      "    >>> files = c.listdir()\n"
      "    \n"
-     "    >>> # Find all Python files recursively\n"
+     "    >>> ## find all Python files recursively\n"
      "    >>> py_files = c.listdir('.', pattern='*.py', recursive=True, fullpath=True)\n"
      "    \n"
-     "    >>> # Find all .txt files (non-recursive)\n"
+     "    >>> ## find all .txt files (non-recursive)\n"
      "    >>> txt_files = c.listdir('/documents', pattern='*.txt', files_only=True)\n"
      "    \n"
-     "    >>> # List only subdirectories\n"
+     "    >>> ## list only subdirectories\n"
      "    >>> dirs = c.listdir('/home', dirs_only=True)\n"},
+    {"hash_fast",
+     (PyCFunction)c_hash_fast,
+     METH_VARARGS,
+     "hash_fast(data) -> int\n\n"
+     "Compute a fast, non cryptographic hash of the given bytes like object.\n\n"
+     "Args:\n"
+     "    data (bytes-like): input data to hash.\n\n"
+     "Returns:\n"
+     "    int: 64 bit fast hash value.\n\n"
+     "Example:\n"
+     "    >>> h = c.hash_fast(b'hello')\n"},
+    {"hash_secure",
+     (PyCFunction)c_hash_secure,
+     METH_VARARGS,
+     "hash_secure(data) -> bytes\n\n"
+     "Compute a secure, cryptographically strong hash of the given data.\n\n"
+     "Args:\n"
+     "    data (bytes like): Input data.\n\n"
+     "Returns:\n"
+     "    bytes: 32 byte secure hash.\n\n"
+     "Example:\n"
+     "    >>> h = c.hash_secure(b'i live at [insert adress]')\n"},
+    {"hash_file_fast",
+     (PyCFunction)c_hash_file_fast,
+     METH_VARARGS,
+     "hash_file_fast(path) -> int\n\n"
+     "Compute a fast, non cryptographic hash of a file's entire contents.\n\n"
+     "Args:\n"
+     "    path (str): path to the file.\n\n"
+     "Returns:\n"
+     "    int: 64 bit fast hash of the file.\n\n"
+     "Example:\n"
+     "    >>> h = c.hash_file_fast('data.bin')\n"},
+
+    {"hash_file_secure",
+     (PyCFunction)c_hash_file_secure,
+     METH_VARARGS,
+     "hash_file_secure(path) -> bytes\n\n"
+     "Compute a cryptographically secure hash of a file.\n\n"
+     "Args:\n"
+     "    path (str): path to the file.\n\n"
+     "Returns:\n"
+     "    bytes: 32 byte secure hash.\n\n"
+     "Example:\n"
+     "    >>> h = c.hash_file_secure('tax_fraud_12.dat')\n"},
     {NULL, NULL, 0, NULL}};
 
 // end
