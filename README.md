@@ -27,13 +27,13 @@ Oh boy I'm ~~(not)~~ glad you asked! I'll list off the features for **CommonDoes
 `c.bytes(bytearray)` overwrites string from **Python** and from RAM by zero'ing it.
 
 ### **Hashing** 
-`c.hash_fast(data)` - blazing fast non cryptographic hash **(xxHash based)** for file comparison, checksums, deduplication.
+`c.fhash(data)` - blazing fast non cryptographic hash **(xxHash based)** for file comparison, checksums, deduplication.
 
-`c.hash_secure(data)` - my own **CommonHash-256** cryptographic hash algorithm! 256 bit output with custom **Sbox** and **Merkle-Damgard** construction.
+`c.shash(data)` - my own **HA256** cryptographic hash algorithm! 256 bit output with custom **Sbox** and **Merkle-Damgard** construction.
 
-`c.hash_file_fast(path)` - fast hash entire files (optimized for speed).
+`c.fhash_file(path)` - fast hash entire files (optimized for speed).
 
-`c.hash_file_secure(path)` - cryptographically secure file hashing for integrity verification.
+`c.shash_file(path)` - cryptographically secure file hashing for integrity verification.
 
 ### **File operations**
 `c.read(path, binary=False)` - file reading; one liner.
@@ -97,14 +97,14 @@ if c.contime(expected_hash, computed_hash):
     print("Authenticated.")
 
 ## hashing; fast non cryptographic hashes
-file_hash = c.hash_fast(b"file contents")
-quick_checksum = c.hash_file_fast("bigfile.iso")
+file_hash = c.fhash(b"file contents")
+quick_checksum = c.fhash_file("bigfile.iso")
 
 ## hashing cryptographic (CommonHash-256; yes i am well aware of how unoriginal i am)
-secure_digest = c.hash_secure(b"important data")
+secure_digest = c.shash(b"important data")
 print(secure_digest.hex())  ## 64 hex chars (32 bytes)
 
-file_digest = c.hash_file_secure("maybe_malawre.exe")
+file_digest = c.fhash_file("maybe_malware.exe")
 if file_digest == expected_digest:
     print("File integrity verified.")
 
@@ -127,12 +127,12 @@ About everything you'd need to know about **CommonDoesThings**...
 
 ---
 
-### **CommonHash-256**
+### **HA256** - *get it?*
 This little *mess* that I call a hashing algorithm is based on...
 - **256 bit output** (32 bytes); same size as `SHA-256`.
 - **Merkle-Damgard construction** - proven structure used by many hash functions.
 - **Custom S-box** - adds confusion layer for better collision resistance.
-- **Fast compression function** - optimized for performance, believe it or not.
+- **Fast compression function**; optimized for performance, believe it or not.
 
 Now you might be asking yourself; *"Is this production ready?"*, to that I say fuck no. Just use `SHA-256 / 512`. This was more made just for fun and wanting to see how secure can it be.
 
@@ -143,5 +143,3 @@ Bare in mind some of the functions like `c.rmdir()` are *DANGEROUS* if not used 
 If you want a more *"serious"* tool (that's also generous) check out my encryption software; **PyKryptor**!
 
 ### **[PyKryptor (repo) <---](https://github.com/Commonwealthrocks/PyKryptor/)**
-
----
