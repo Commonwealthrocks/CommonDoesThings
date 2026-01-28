@@ -1,18 +1,18 @@
 ## pyproject.toml
-## last updated: 04/12/2025 <d/m/y>
+## last updated: 28/01/2026 <d/m/y>
 ## common-does-things
 [build-system]
 requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 [project]
 name = "commondoesthings"
-version = "0.2a"
+version = "0.3a"
 description = "Custom Python functions made in C that I or you might find useful..."
 authors = [{ name = "Commonwealthrocks" }]
 requires-python = ">=3.8"
 classifiers = [
-    "Development status :: 3 - Alpha",
-    "Intended audience :: Developers",
+    "Development status :: 3 - alpha",
+    "Intended audience :: developers",
     "License :: OSI approved :: MIT license",
     "Programming language :: Python :: 3",
     "Programming language :: Python :: 3.8",
