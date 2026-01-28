@@ -74,7 +74,7 @@ Needs `pip` and **Python** in your systems `PATH` to work; the reason why I coul
 All requirements needed *IF* installing **CommonDoesThings** straight from the source.
 
 ### **Python**
-**At least Python `3.8+`** - for my case I used **Python** `3.12` so it will differ depending on your version.
+**At least Python `3.8+`**; for my case I used **Python** `3.12` so it will differ depending on your version.
 
 ### **C compiler**
 To compile the **C** code yourself / install it with `pip` you will need a **C** compiler; you can use `MSVC` or `GCC` for **Windows**, or just `GCC` for **Linux**.
@@ -100,7 +100,7 @@ if c.contime(expected_hash, computed_hash):
 file_hash = c.fhash(b"file contents")
 quick_checksum = c.fhash_file("bigfile.iso")
 
-## hashing cryptographic (CommonHash-256; yes i am well aware of how unoriginal i am)
+## hashing cryptographic (HA256; yes i am well aware of how unoriginal i am)
 secure_digest = c.shash(b"important data")
 print(secure_digest.hex())  ## 64 hex chars (32 bytes)
 
