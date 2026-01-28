@@ -9,10 +9,7 @@ extra_link_args = []
 libraries = []
 if sys.platform == "win32":
     libraries = ["advapi32"]
-    if "MSC" in sys.version:
-        extra_compile_args = ["/W3"]
-    else:
-        extra_compile_args = ["-Wall"]
+    extra_compile_args = []
 else:
     extra_compile_args = ["-Wall", "-Wextra"]
 c_module = Extension(
