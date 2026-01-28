@@ -1,11 +1,13 @@
 // c_hashes.c
-// last updated: 04/12/2025 <d/m/y>
+// last updated: 28/01/2026 <d/m/y>
 // common-does-things
-#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <string.h>
 #include <stdint.h>
-#define XXH_PRIME32_1 0x9E3779B1U // uncryptograpihc hash (dii)
+#ifdef _MSC_VER
+#include <stdlib.h>
+#endif
+#define XXH_PRIME32_1 0x9E3779B1U
 #define XXH_PRIME32_2 0x85EBCA77U
 #define XXH_PRIME32_3 0xC2B2AE3DU
 #define XXH_PRIME32_4 0x27D4EB2FU
@@ -74,15 +76,15 @@ xxhash32(const void *input, size_t len)
     h32 ^= h32 >> 16;
     return h32;
 }
-#define CH_BLOCK_SIZE 64
-#define CH_HASH_SIZE 32
+#define HA256_BLOCK_SIZE 64
+#define HA256_HASH_SIZE 32
 typedef struct
 {
     uint32_t state[8];
-    uint8_t buffer[CH_BLOCK_SIZE];
+    uint8_t buffer[HA256_BLOCK_SIZE];
     uint64_t count;
-} CommonHash_CTX;
-static const uint8_t CH_SBOX[256] = {
+} HA256_CTX;
+static const uint8_t HA256_SBOX[256] = {
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
     0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
     0xb7, 0xfd, 0x93, 0x26, 0x36, 0x3f, 0xf7, 0xcc, 0x34, 0xa5, 0xe5, 0xf1, 0x71, 0xd8, 0x31, 0x15,
@@ -99,20 +101,23 @@ static const uint8_t CH_SBOX[256] = {
     0x70, 0x3e, 0xb5, 0x66, 0x48, 0x03, 0xf6, 0x0e, 0x61, 0x35, 0x57, 0xb9, 0x86, 0xc1, 0x1d, 0x9e,
     0xe1, 0xf8, 0x98, 0x11, 0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e, 0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf,
     0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16};
-static inline uint32_t ch_rotr(uint32_t x, int n)
+
+static inline uint32_t ha256_rotr(uint32_t x, int n)
 {
+#ifdef _MSC_VER
+    return _rotr(x, n);
+#else
     return (x >> n) | (x << (32 - n));
+#endif
 }
-static inline uint32_t ch_rotl(uint32_t x, int n)
-{
-    return (x << n) | (x >> (32 - n));
-}
+
 static void
-commonhash_compress(uint32_t state[8], const uint8_t block[CH_BLOCK_SIZE])
+ha256_compress(uint32_t state[8], const uint8_t block[HA256_BLOCK_SIZE])
 {
     uint32_t w[64];
     uint32_t a, b, c, d, e, f, g, h;
     int i;
+    // Prepare message schedule
     for (i = 0; i < 16; i++)
     {
         w[i] = ((uint32_t)block[i * 4] << 24) |
@@ -120,12 +125,19 @@ commonhash_compress(uint32_t state[8], const uint8_t block[CH_BLOCK_SIZE])
                ((uint32_t)block[i * 4 + 2] << 8) |
                ((uint32_t)block[i * 4 + 3]);
     }
-    for (i = 16; i < 64; i++)
+    for (i = 16; i < 64; i += 4) // Unrolled by 4
     {
-        uint32_t s0 = ch_rotr(w[i - 15], 7) ^ ch_rotr(w[i - 15], 18) ^ (w[i - 15] >> 3);
-        uint32_t s1 = ch_rotr(w[i - 2], 17) ^ ch_rotr(w[i - 2], 19) ^ (w[i - 2] >> 10);
-        w[i] = w[i - 16] + s0 + w[i - 7] + s1;
-        w[i] ^= CH_SBOX[w[i] & 0xFF];
+#define M_SCH_STEP(k)                                                                                \
+    {                                                                                                \
+        uint32_t s0 = ha256_rotr(w[(k) - 15], 7) ^ ha256_rotr(w[(k) - 15], 18) ^ (w[(k) - 15] >> 3); \
+        uint32_t s1 = ha256_rotr(w[(k) - 2], 17) ^ ha256_rotr(w[(k) - 2], 19) ^ (w[(k) - 2] >> 10);  \
+        w[(k)] = w[(k) - 16] + s0 + w[(k) - 7] + s1;                                                 \
+        w[(k)] ^= HA256_SBOX[w[(k)] & 0xFF];                                                         \
+    }
+        M_SCH_STEP(i)
+        M_SCH_STEP(i + 1)
+        M_SCH_STEP(i + 2)
+        M_SCH_STEP(i + 3)
     }
     a = state[0];
     b = state[1];
@@ -137,12 +149,13 @@ commonhash_compress(uint32_t state[8], const uint8_t block[CH_BLOCK_SIZE])
     h = state[7];
     for (i = 0; i < 64; i++)
     {
-        uint32_t S1 = ch_rotr(e, 6) ^ ch_rotr(e, 11) ^ ch_rotr(e, 25);
+        uint32_t S1 = ha256_rotr(e, 6) ^ ha256_rotr(e, 11) ^ ha256_rotr(e, 25);
         uint32_t ch = (e & f) ^ (~e & g);
         uint32_t temp1 = h + S1 + ch + w[i];
-        uint32_t S0 = ch_rotr(a, 2) ^ ch_rotr(a, 13) ^ ch_rotr(a, 22);
+        uint32_t S0 = ha256_rotr(a, 2) ^ ha256_rotr(a, 13) ^ ha256_rotr(a, 22);
         uint32_t maj = (a & b) ^ (a & c) ^ (b & c);
         uint32_t temp2 = S0 + maj;
+
         h = g;
         g = f;
         f = e;
@@ -162,7 +175,7 @@ commonhash_compress(uint32_t state[8], const uint8_t block[CH_BLOCK_SIZE])
     state[7] += h;
 }
 static void
-commonhash_init(CommonHash_CTX *ctx)
+ha256_init(HA256_CTX *ctx)
 {
     ctx->state[0] = 0x6a09e667;
     ctx->state[1] = 0xbb67ae85;
@@ -175,24 +188,23 @@ commonhash_init(CommonHash_CTX *ctx)
     ctx->count = 0;
 }
 static void
-commonhash_update(CommonHash_CTX *ctx, const uint8_t *data, size_t len)
+ha256_update(HA256_CTX *ctx, const uint8_t *data, size_t len)
 {
-    size_t i;
-    size_t index = ctx->count % CH_BLOCK_SIZE;
+    size_t index = ctx->count % HA256_BLOCK_SIZE;
     ctx->count += len;
-    if (index + len >= CH_BLOCK_SIZE)
+    if (index + len >= HA256_BLOCK_SIZE)
     {
-        size_t fill = CH_BLOCK_SIZE - index;
+        size_t fill = HA256_BLOCK_SIZE - index;
         memcpy(ctx->buffer + index, data, fill);
-        commonhash_compress(ctx->state, ctx->buffer);
+        ha256_compress(ctx->state, ctx->buffer);
         index = 0;
         data += fill;
         len -= fill;
-        while (len >= CH_BLOCK_SIZE)
+        while (len >= HA256_BLOCK_SIZE)
         {
-            commonhash_compress(ctx->state, data);
-            data += CH_BLOCK_SIZE;
-            len -= CH_BLOCK_SIZE;
+            ha256_compress(ctx->state, data);
+            data += HA256_BLOCK_SIZE;
+            len -= HA256_BLOCK_SIZE;
         }
     }
     if (len > 0)
@@ -200,10 +212,11 @@ commonhash_update(CommonHash_CTX *ctx, const uint8_t *data, size_t len)
         memcpy(ctx->buffer + index, data, len);
     }
 }
+
 static void
-commonhash_final(CommonHash_CTX *ctx, uint8_t hash[CH_HASH_SIZE])
+ha256_final(HA256_CTX *ctx, uint8_t hash[HA256_HASH_SIZE])
 {
-    size_t index = ctx->count % CH_BLOCK_SIZE;
+    size_t index = ctx->count % HA256_BLOCK_SIZE;
     size_t pad_len = (index < 56) ? (56 - index) : (120 - index);
     uint8_t padding[128];
     padding[0] = 0x80;
@@ -213,7 +226,7 @@ commonhash_final(CommonHash_CTX *ctx, uint8_t hash[CH_HASH_SIZE])
     {
         padding[pad_len + i] = (bit_count >> (56 - i * 8)) & 0xFF;
     }
-    commonhash_update(ctx, padding, pad_len + 8);
+    ha256_update(ctx, padding, pad_len + 8);
     for (int i = 0; i < 8; i++)
     {
         hash[i * 4] = (ctx->state[i] >> 24) & 0xFF;
@@ -223,7 +236,7 @@ commonhash_final(CommonHash_CTX *ctx, uint8_t hash[CH_HASH_SIZE])
     }
 }
 PyObject *
-c_hash_fast(PyObject *self, PyObject *args)
+c_fhash(PyObject *self, PyObject *args)
 {
     Py_buffer buffer;
     PyObject *data_obj;
@@ -242,7 +255,7 @@ c_hash_fast(PyObject *self, PyObject *args)
     return PyLong_FromUnsignedLong(hash);
 }
 PyObject *
-c_hash_secure(PyObject *self, PyObject *args)
+c_shash(PyObject *self, PyObject *args)
 {
     Py_buffer buffer;
     PyObject *data_obj;
@@ -255,16 +268,16 @@ c_hash_secure(PyObject *self, PyObject *args)
         PyErr_SetString(PyExc_TypeError, "Argument must be bytes-like");
         return NULL;
     }
-    CommonHash_CTX ctx;
-    uint8_t hash[CH_HASH_SIZE];
-    commonhash_init(&ctx);
-    commonhash_update(&ctx, buffer.buf, buffer.len);
-    commonhash_final(&ctx, hash);
+    HA256_CTX ctx;
+    uint8_t hash[HA256_HASH_SIZE];
+    ha256_init(&ctx);
+    ha256_update(&ctx, buffer.buf, buffer.len);
+    ha256_final(&ctx, hash);
     PyBuffer_Release(&buffer);
-    return PyBytes_FromStringAndSize((const char *)hash, CH_HASH_SIZE);
+    return PyBytes_FromStringAndSize((const char *)hash, HA256_HASH_SIZE);
 }
 PyObject *
-c_hash_file_fast(PyObject *self, PyObject *args)
+c_fhash_file(PyObject *self, PyObject *args)
 {
     const char *filename;
     FILE *fp;
@@ -301,14 +314,14 @@ c_hash_file_fast(PyObject *self, PyObject *args)
 }
 
 PyObject *
-c_hash_file_secure(PyObject *self, PyObject *args)
+c_shash_file(PyObject *self, PyObject *args)
 {
     const char *filename;
     FILE *fp;
     uint8_t buffer[8192];
     size_t bytes_read;
-    CommonHash_CTX ctx;
-    uint8_t hash[CH_HASH_SIZE];
+    HA256_CTX ctx;
+    uint8_t hash[HA256_HASH_SIZE];
     if (!PyArg_ParseTuple(args, "s", &filename))
     {
         return NULL;
@@ -319,14 +332,14 @@ c_hash_file_secure(PyObject *self, PyObject *args)
         PyErr_SetFromErrnoWithFilename(PyExc_FileNotFoundError, filename);
         return NULL;
     }
-    commonhash_init(&ctx);
+    ha256_init(&ctx);
     while ((bytes_read = fread(buffer, 1, sizeof(buffer), fp)) > 0)
     {
-        commonhash_update(&ctx, buffer, bytes_read);
+        ha256_update(&ctx, buffer, bytes_read);
     }
     fclose(fp);
-    commonhash_final(&ctx, hash);
-    return PyBytes_FromStringAndSize((const char *)hash, CH_HASH_SIZE);
+    ha256_final(&ctx, hash);
+    return PyBytes_FromStringAndSize((const char *)hash, HA256_HASH_SIZE);
 }
 
 // end

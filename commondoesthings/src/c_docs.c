@@ -1,5 +1,5 @@
 // c_docs.c
-// last updated: 25/11/2025 <d/m/y>
+// last updated: 28/01/2026 <d/m/y>
 // common-does-things
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
@@ -17,10 +17,10 @@ extern PyObject *c_rmfile(PyObject *self, PyObject *args, PyObject *kwargs);
 extern PyObject *c_rmdir(PyObject *self, PyObject *args, PyObject *kwargs);
 extern PyObject *c_contime(PyObject *self, PyObject *args);
 extern PyObject *c_listdir(PyObject *self, PyObject *args, PyObject *kwargs);
-extern PyObject *c_hash_fast(PyObject *self, PyObject *args);
-extern PyObject *c_hash_secure(PyObject *self, PyObject *args);
-extern PyObject *c_hash_file_fast(PyObject *self, PyObject *args);
-extern PyObject *c_hash_file_secure(PyObject *self, PyObject *args);
+extern PyObject *c_fhash(PyObject *self, PyObject *args);
+extern PyObject *c_shash(PyObject *self, PyObject *args);
+extern PyObject *c_fhash_file(PyObject *self, PyObject *args);
+extern PyObject *c_shash_file(PyObject *self, PyObject *args);
 PyMethodDef c_methods[] = {
     {"run",
      (PyCFunction)c_run,
@@ -111,7 +111,7 @@ PyMethodDef c_methods[] = {
      "HelloWorld(text) -> None\n\n"
      "A gimmick function that prints 'Hello World...?' to stdout.\n\n"
      "Args:\n"
-     "    text (str): Input text (not used, just required).\n\n"
+     "    text (str): input text (not used, just required).\n\n"
      "Example:\n"
      "    >>> c.HelloWorld('anything')\n"
      "    Hello World...?\n"},
@@ -162,8 +162,8 @@ PyMethodDef c_methods[] = {
      "of where the first mismatch occurs. This prevents attackers from\n"
      "using timing information to guess secrets byte-by-byte.\n\n"
      "Args:\n"
-     "    a (bytes-like): first value to compare.\n"
-     "    b (bytes-like): second value to compare.\n\n"
+     "    a (bytes like): first value to compare.\n"
+     "    b (bytes like): second value to compare.\n\n"
      "Returns:\n"
      "    bool: True if equal, False otherwise.\n\n"
      "Example:\n"
@@ -202,51 +202,51 @@ PyMethodDef c_methods[] = {
      "    \n"
      "    >>> ## list only subdirectories\n"
      "    >>> dirs = c.listdir('/home', dirs_only=True)\n"},
-    {"hash_fast",
-     (PyCFunction)c_hash_fast,
+    {"fhash",
+     (PyCFunction)c_fhash,
      METH_VARARGS,
-     "hash_fast(data) -> int\n\n"
+     "fhash(data) -> int\n\n"
      "Compute a fast, non cryptographic hash of the given bytes like object.\n\n"
      "Args:\n"
      "    data (bytes-like): input data to hash.\n\n"
      "Returns:\n"
      "    int: 64 bit fast hash value.\n\n"
      "Example:\n"
-     "    >>> h = c.hash_fast(b'hello')\n"},
-    {"hash_secure",
-     (PyCFunction)c_hash_secure,
+     "    >>> h = c.fhash(b'hello')\n"},
+    {"shash",
+     (PyCFunction)c_shash,
      METH_VARARGS,
-     "hash_secure(data) -> bytes\n\n"
-     "Compute a secure, cryptographically strong hash of the given data.\n\n"
+     "shash(data) -> bytes\n\n"
+     "Compute a secure, cryptographically strong hash (HA256) of the given data.\n\n"
      "Args:\n"
      "    data (bytes like): Input data.\n\n"
      "Returns:\n"
      "    bytes: 32 byte secure hash.\n\n"
      "Example:\n"
-     "    >>> h = c.hash_secure(b'i live at [insert adress]')\n"},
-    {"hash_file_fast",
-     (PyCFunction)c_hash_file_fast,
+     "    >>> h = c.shash(b'i live at [insert address]')\n"},
+    {"fhash_file",
+     (PyCFunction)c_fhash_file,
      METH_VARARGS,
-     "hash_file_fast(path) -> int\n\n"
+     "fhash_file(path) -> int\n\n"
      "Compute a fast, non cryptographic hash of a file's entire contents.\n\n"
      "Args:\n"
      "    path (str): path to the file.\n\n"
      "Returns:\n"
      "    int: 64 bit fast hash of the file.\n\n"
      "Example:\n"
-     "    >>> h = c.hash_file_fast('data.bin')\n"},
+     "    >>> h = c.fhash_file('data.bin')\n"},
 
-    {"hash_file_secure",
-     (PyCFunction)c_hash_file_secure,
+    {"shash_file",
+     (PyCFunction)c_shash_file,
      METH_VARARGS,
-     "hash_file_secure(path) -> bytes\n\n"
-     "Compute a cryptographically secure hash of a file.\n\n"
+     "shash_file(path) -> bytes\n\n"
+     "Compute a cryptographically secure hash (HA256) of a file.\n\n"
      "Args:\n"
      "    path (str): path to the file.\n\n"
      "Returns:\n"
      "    bytes: 32 byte secure hash.\n\n"
      "Example:\n"
-     "    >>> h = c.hash_file_secure('tax_fraud_12.dat')\n"},
+     "    >>> h = c.shash_file('tax_fraud_12.dat')\n"},
     {NULL, NULL, 0, NULL}};
 
 // end

@@ -1,5 +1,5 @@
 // module.c
-// last updated: 04/12/2025 <d/m/y>
+// last updated: 28/01/2026 <d/m/y>
 // common-does-things
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
@@ -29,10 +29,10 @@ extern PyObject *c_iusenixosbtw(PyObject *self, PyObject *args);
 extern PyObject *c_rmfile(PyObject *self, PyObject *args, PyObject *kwargs);
 extern PyObject *c_rmdir(PyObject *self, PyObject *args, PyObject *kwargs);
 extern PyObject *c_contime(PyObject *self, PyObject *args);
-extern PyObject *c_hash_fast(PyObject *self, PyObject *args);
-extern PyObject *c_hash_secure(PyObject *self, PyObject *args);
-extern PyObject *c_hash_file_fast(PyObject *self, PyObject *args);
-extern PyObject *c_hash_file_secure(PyObject *self, PyObject *args);
+extern PyObject *c_fhash(PyObject *self, PyObject *args);
+extern PyObject *c_shash(PyObject *self, PyObject *args);
+extern PyObject *c_fhash_file(PyObject *self, PyObject *args);
+extern PyObject *c_shash_file(PyObject *self, PyObject *args);
 extern PyObject *c_listdir(PyObject *self, PyObject *args, PyObject *kwargs);
 extern PyMethodDef c_methods[];
 static struct PyModuleDef c_module = {
